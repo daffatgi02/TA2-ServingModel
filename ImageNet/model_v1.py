@@ -11,7 +11,7 @@ CORS(app)
 # Fungsi untuk memuat model TFLite berdasarkan jenis hewan
 def load_tflite_model(jenis_hewan):
     # path model berdasarkan jenis hewan
-    path_model = f'{jenis_hewan}_Model.tflite'
+    path_model = f'{jenis_hewan}_ModelMobileNet.tflite'
     
     # Memuat model TFLite
     interpreter = tf.lite.Interpreter(model_path=path_model)

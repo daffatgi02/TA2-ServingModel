@@ -4,6 +4,7 @@ from tensorflow.keras.models import load_model
 from PIL import Image
 import numpy as np
 from flask_cors import CORS
+from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
 CORS(app)
@@ -29,9 +30,13 @@ def home():
 def predict():
     try:
         # Menerima gambar dan jenis hewan dari pengguna
-        file_gambar = request.files['image']
+        file_gambar = request.files.get('image')
         jenis_hewan = request.form.get('type', 'kambing')  # Default ke 'kambing' jika tidak spesifik
-        
+
+        # Handling Error 400: No Return no Image or Type specified
+        if not file_gambar or not jenis_hewan:
+            raise BadRequest('Error 400: No Image or Type specified')
+
         # Memuat dan memproses gambar
         gambar = Image.open(file_gambar).convert('RGB')
         gambar = gambar.resize((180, 180))
@@ -39,6 +44,10 @@ def predict():
 
         # Memuat model TFLite berdasarkan jenis hewan
         interpreter, input_details, output_details = load_tflite_model(jenis_hewan)
+
+        # Handling Error 500: Model Load Failed
+        if not interpreter:
+            raise Exception('Error 500: Model Load Failed')
 
         # Menetapkan nilai tensor input
         interpreter.set_tensor(input_details[0]['index'], data_input)
@@ -67,8 +76,8 @@ def predict():
         return jsonify(hasil)
 
     except Exception as e:
-        # Menangani exception yang mungkin terjadi selama proses prediksi
-        return jsonify({'error': str(e)})
+        # Handling Error 500: Prediction Failed
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Menjalankan aplikasi Flask pada host='0.0.0.0' dan port=5000

@@ -1,5 +1,7 @@
-flask
-tensorflow 
-pillow
-numpy
+Flask
+tensorflow==2.7.0
+Pillow
 flask-cors
+Werkzeug
+pytz
+numpy
